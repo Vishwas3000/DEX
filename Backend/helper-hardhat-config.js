@@ -19,7 +19,7 @@ const networkConfig = {
 }
 const developmentChains = ["hardhat", "localhost"]
 
-const frontendConsts = "../Frontend/constants/"
+const frontendConsts = "../Frontend/decentralized-exchange/constants/"
 
 module.exports = {
     networkConfig,
