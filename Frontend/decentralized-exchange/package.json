@@ -1,6 +1,6 @@
 {
-  "name": "decentralized-exchange",
-  "version": "0.1.0",
+  "name": "DEX",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -17,6 +17,12 @@
     "web3uikit": "^1.0.4"
   },
   "devDependencies": {
-    "prettier": "^2.8.6"
-  }
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.21",
+    "prettier": "^2.8.6",
+    "tailwindcss": "^3.2.7"
+  },
+  "description": "A simple decentralized exchange",
+  "main": "index.js",
+  "license": "MIT"
 }
