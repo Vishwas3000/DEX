@@ -26,15 +26,28 @@ async function updateContractAbi() {
 
 async function updateContractAddresses() {
     const exchange = await ethers.getContract("Exchange")
+    const cryptoDevToken = await ethers.getContract("CryptoDevToken")
+
     const chainId = network.config.chainId.toString()
     const contractAddesses = await JSON.parse(fs.readFileSync(`${frontendConsts}contractAddresses.json`, "utf8"))
 
     if (chainId in contractAddesses) {
-        if (!contractAddesses[chainId]["Exchange"].includes(exchange.address)) {
-            contractAddesses[chainId]["Exchange"].push(exchange.address)
+        if (contractAddesses[chainId].hasOwnProperty("Exchange")) {
+            if (!contractAddesses[chainId]["Exchange"].includes(exchange.address)) {
+                contractAddesses[chainId]["Exchange"].push(exchange.address)
+            }
+        } else {
+            contractAddesses[chainId][Exchange] = [exchange.address]
+        }
+        if (contractAddesses[chainId].hasOwnProperty("CryptoDevToken")) {
+            if (!contractAddesses[chainId]["CryptoDevToken"].includes(cryptoDevToken.address)) {
+                contractAddesses[chainId]["CryptoDevToken"].push(cryptoDevToken.address)
+            }
+        } else {
+            contractAddesses[chainId].CryptoDevToken = [cryptoDevToken.address]
         }
     } else {
-        contractAddesses[chainId] = { Exchange: [exchange.address] }
+        contractAddesses[chainId] = { Exchange: [exchange.address], CryptoDevToken: [cryptoDevToken.address] }
     }
 
     fs.writeFileSync(`${frontendConsts}contractAddresses.json`, JSON.stringify(contractAddesses))
