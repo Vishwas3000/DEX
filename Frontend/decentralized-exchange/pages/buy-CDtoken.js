@@ -56,7 +56,6 @@ export default function MintCryptoDev() {
         )
         await setMintAmount(mintAmount)
     }
-
     async function handleMintSuccess(tx) {
         await tx.wait(1)
         dispatch({
@@ -110,7 +109,6 @@ export default function MintCryptoDev() {
                 title="Mint CD Token"
                 id="main form"
                 isDisabled={disableButton}
-                // customFooter={<Button type="submit" text="Submit" onClick={MintCryptoDevToken} />}
             />
         </div>
     )

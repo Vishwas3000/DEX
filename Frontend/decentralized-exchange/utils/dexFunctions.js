@@ -16,12 +16,15 @@ async function GetReserveUtil(constractAddress, contractAbi, runContractFunction
 }
 
 async function AddLiquidityUtil(contractAddress, contractAbi, ethAmountToAdd, CDTokenAmountToAdd, runContractFunction) {
+    const ethAmountToAddWei = ethers.utils.parseEther(ethAmountToAdd)
+    const CDTokenAmountToAddWei = ethers.utils.parseEther(CDTokenAmountToAdd)
+
     const addLiquidityOpt = {
         abi: contractAbi,
         contractAddress: contractAddress,
         functionName: "addLiquidity",
-        msgValue: ethers.utils.parseEther(ethAmountToAdd),
-        params: { _amount: ethers.utils.parseEther(CDTokenAmountToAdd) },
+        msgValue: ethAmountToAddWei,
+        params: { _amount: CDTokenAmountToAddWei },
     }
 
     const liquidity = await runContractFunction({
@@ -32,4 +35,28 @@ async function AddLiquidityUtil(contractAddress, contractAbi, ethAmountToAdd, CD
     return liquidity
 }
 
-export { GetReserveUtil, AddLiquidityUtil }
+async function GetAmountOfTokenUtil(
+    constractAddress,
+    contractAbi,
+    fromTokenAmount,
+    fromTokenReserve,
+    toTokenReserve,
+    runContractFunction
+) {
+    const getAmountOfTokenOpt = {
+        abi: contractAbi,
+        contractAddress: contractAddress,
+        functionName: "getAmountOfToken",
+        params: { inputAmount: fromTokenAmount, inputReserve: fromTokenReserve, outputReserve: toTokenReserve },
+    }
+
+    const toTokenRecieved = await runContractFunction({
+        params: getAmountOfTokenOpt,
+        onSuccess: (result) => console.log(result),
+        onError: (error) => console.log(error),
+    })
+    const toTokenRecievedWei = ethers.utils.formatEther(toTokenRecieved)
+    return toTokenRecievedWei
+}
+
+export { GetReserveUtil, AddLiquidityUtil, GetAmountOfTokenUtil }
