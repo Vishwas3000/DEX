@@ -1,9 +1,10 @@
 import styles from "../styles/Home.module.css"
-import { Card, Form, useNotification, Button } from "web3uikit"
+import { Card, Form, useNotification, Button, Information } from "web3uikit"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import { cryptoDevTokenAbi, contractAddresses } from "../constants/index"
 import { ethers } from "ethers"
 import { useEffect, useState } from "react"
+import { GetMinimumTokenMintUtil, GetTotalCDTokenOwnUtil, MintCryptoDevTokenUtil } from "../utils/CDTokenFunctions"
 
 export default function MintCryptoDev() {
     const { isWeb3Enabled, account } = useMoralis()
@@ -27,59 +28,35 @@ export default function MintCryptoDev() {
     }, [isWeb3Enabled, mintAmount])
 
     async function GetMinimumTokenMint() {
-        const minTokenMintOpt = {
-            abi: cryptoDevTokenAbi,
-            contractAddress: contractAddress,
-            functionName: "MIN_TOKEN_TO_MINT",
-        }
-
-        await runContractFunction({
-            params: minTokenMintOpt,
-            onSuccess: (result) => setMinTokenMint(ethers.utils.formatUnits(result, 0)),
-            onError: (error) => console.log(error),
-        })
+        const minTokenMint = await GetMinimumTokenMintUtil(cryptoDevTokenAbi, contractAddress, runContractFunction)
+        setMinTokenMint(minTokenMint)
     }
 
     async function GetTotalCDTokenOwn() {
-        const currentCDOwnedOpt = {
-            abi: cryptoDevTokenAbi,
-            contractAddress: contractAddress,
-            functionName: "balanceOf",
-            params: { account: account },
-        }
-        console.log("account: ", account)
-
-        await runContractFunction({
-            params: currentCDOwnedOpt,
-            onSuccess: (result) => setCurrentCDOwned(ethers.utils.formatUnits(result, 18)),
-            onError: (error) => console.log(error),
-        })
+        const currentCDOwned = await GetTotalCDTokenOwnUtil(
+            cryptoDevTokenAbi,
+            contractAddress,
+            runContractFunction,
+            account
+        )
+        setCurrentCDOwned(currentCDOwned)
     }
 
     async function MintCryptoDevToken(data) {
-        console.log("Minting...")
-
         const EthValue = ethers.utils.parseEther(data.data[1].inputResult)
         const mintAmount = data.data[0].inputResult
 
-        console.log("Minting " + mintAmount + " CryptoDevToken")
-        console.log("eth sent " + EthValue + " Eth")
-
-        const mintOption = {
-            abi: cryptoDevTokenAbi,
-            contractAddress: contractAddress,
-            functionName: "mint",
-            msgValue: EthValue,
-            params: { amount: mintAmount },
-        }
-
-        await runContractFunction({
-            params: mintOption,
-            onSuccess: handleMintSuccess,
-            onError: (error) => console.log(error),
-        })
+        await MintCryptoDevTokenUtil(
+            EthValue,
+            mintAmount,
+            contractAddress,
+            cryptoDevTokenAbi,
+            runContractFunction,
+            handleMintSuccess
+        )
         await setMintAmount(mintAmount)
     }
+
     async function handleMintSuccess(tx) {
         await tx.wait(1)
         dispatch({
@@ -95,8 +72,18 @@ export default function MintCryptoDev() {
     return (
         <div>
             <div className="">
-                <div>Minimum token to Mint : {minTokenMint} CD </div>
-                <div>Your current CD token : {currentCDOwned} CD</div>
+                <Information
+                    className=""
+                    information={`${minTokenMint} CDT`}
+                    topic="Minimum Token to mint"
+                    fontSize="text-2xl"
+                />
+                <Information
+                    className=""
+                    information={`${currentCDOwned} CDT`}
+                    topic="Current CryptoDevToken Owned"
+                    fontSize="text-2xl"
+                />
             </div>
             <Form
                 buttonConfig={{
