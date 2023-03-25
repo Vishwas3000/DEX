@@ -30,6 +30,7 @@ async function GetTotalCDTokenOwnUtil(contractAbi, contractAddress, runContractF
         onSuccess: (result) => console.log(result),
         onError: (error) => console.log(error),
     })
+    console.log("CDOwned: ", CDOwned)
     const CDOwnedWei = ethers.utils.formatEther(CDOwned)
     return CDOwnedWei
 }
@@ -47,11 +48,13 @@ async function MintCryptoDevTokenUtil(
     console.log("Minting " + mintAmount + " CryptoDevToken")
     console.log("eth sent " + EthValue + " Eth")
 
+    const EthValueWei = ethers.utils.parseEther(EthValue)
+
     const mintOption = {
         abi: contractAbi,
         contractAddress: contractAddress,
         functionName: "mint",
-        msgValue: EthValue,
+        msgValue: EthValueWei,
         params: { amount: mintAmount },
     }
 

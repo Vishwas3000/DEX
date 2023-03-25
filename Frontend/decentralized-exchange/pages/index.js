@@ -72,21 +72,20 @@ export default function Home() {
                                 name: "Eth",
                                 type: "text",
                                 value: "",
-                                key: "CryptoDevAmount",
+                                key: "EthValue",
                             },
                             {
                                 inputWidth: "30%",
                                 name: "CD Token",
                                 type: "text",
                                 value: "",
-                                key: "EthValue",
+                                key: "CDTokenValue",
                             },
                         ]}
                         id="main form"
                     />
                 </div>
             </div>
-            <Button onClick={GetReserve} />
         </div>
     )
 }

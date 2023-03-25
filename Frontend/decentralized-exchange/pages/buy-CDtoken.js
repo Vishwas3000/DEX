@@ -1,5 +1,5 @@
 import styles from "../styles/Home.module.css"
-import { Card, Form, useNotification, Button, Information } from "web3uikit"
+import { Card, Input, useNotification, Button, Information } from "web3uikit"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import { cryptoDevTokenAbi, contractAddresses } from "../constants/index"
 import { ethers } from "ethers"
@@ -14,6 +14,7 @@ export default function MintCryptoDev() {
     const [minTokenMint, setMinTokenMint] = useState("")
     const [currentCDOwned, setCurrentCDOwned] = useState("")
     const [mintAmount, setMintAmount] = useState("")
+    const [EthValue, setEthValue] = useState("")
     const [disableButton, setDisableButton] = useState(false)
 
     const chainIdString = chainId ? parseInt(chainId).toString() : "31337"
@@ -42,10 +43,7 @@ export default function MintCryptoDev() {
         setCurrentCDOwned(currentCDOwned)
     }
 
-    async function MintCryptoDevToken(data) {
-        const EthValue = ethers.utils.parseEther(data.data[1].inputResult)
-        const mintAmount = data.data[0].inputResult
-
+    async function MintCryptoDevToken() {
         await MintCryptoDevTokenUtil(
             EthValue,
             mintAmount,
@@ -54,9 +52,9 @@ export default function MintCryptoDev() {
             runContractFunction,
             handleMintSuccess
         )
-        await setMintAmount(mintAmount)
     }
     async function handleMintSuccess(tx) {
+        console.log(mintAmount)
         await tx.wait(1)
         dispatch({
             type: "success",
@@ -69,10 +67,10 @@ export default function MintCryptoDev() {
     }
 
     return (
-        <div>
-            <div className="">
+        <div className=" flex flex-col p-2 space-y-10">
+            <div className="flex flex-col p-2 place-content-evenly space-y-4">
                 <Information
-                    className=""
+                    className="p-5"
                     information={`${minTokenMint} CDT`}
                     topic="Minimum Token to mint"
                     fontSize="text-2xl"
@@ -84,32 +82,32 @@ export default function MintCryptoDev() {
                     fontSize="text-2xl"
                 />
             </div>
-            <Form
-                buttonConfig={{
-                    theme: "primary",
-                    text: "mint",
-                }}
-                onSubmit={MintCryptoDevToken}
-                data={[
-                    {
-                        inputWidth: "30%",
-                        name: "Crypto Dev Token amount",
-                        type: "text",
-                        value: "",
-                        key: "CryptoDevAmount",
-                    },
-                    {
-                        inputWidth: "30%",
-                        name: "Eth Value",
-                        type: "text",
-                        value: "",
-                        key: "EthValue",
-                    },
-                ]}
-                title="Mint CD Token"
-                id="main form"
-                isDisabled={disableButton}
-            />
+
+            <div className="px-10 space-y-5">
+                <h1 className="text-2xl font-bold text-sky-900">Mint CD Token</h1>
+                <Input
+                    label="CD Token"
+                    onChange={(event) => {
+                        setMintAmount(event.target.value)
+                    }}
+                />
+                <Input
+                    label="Eth Value"
+                    onChange={(event) => {
+                        setEthValue(event.target.value)
+                    }}
+                />
+                <Button
+                    text="Mint"
+                    color="green"
+                    theme="colored"
+                    isLoading={disableButton}
+                    onClick={() => {
+                        setDisableButton(true)
+                        MintCryptoDevToken()
+                    }}
+                />
+            </div>
         </div>
     )
 }
