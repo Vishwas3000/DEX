@@ -1,6 +1,27 @@
 import { ethers } from "ethers"
 
-async function GetCurrentAllowanceUtil() {}
+async function GetCurrentAllowanceUtil(
+    contractAddress,
+    contractAbi,
+    runContractFunction,
+    ownerAddress,
+    spenderAddress
+) {
+    const allowanceOpt = {
+        abi: contractAbi,
+        contractAddress: contractAddress,
+        functionName: "allowance",
+        params: { owner: ownerAddress, spender: spenderAddress },
+    }
+
+    const allowanceWei = await runContractFunction({
+        params: allowanceOpt,
+        onError: (error) => console.log(error),
+    })
+    const allowance = ethers.utils.formatEther(allowanceWei)
+    console.log("allowance: ", allowance)
+    return allowance
+}
 
 async function ApproveAllowanceUtil(
     contractAddress,

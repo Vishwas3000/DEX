@@ -3,7 +3,7 @@ import { useMoralis, useWeb3Contract } from "react-moralis"
 import { exchangeAbi, contractAddresses } from "../constants/index"
 import { ethers } from "ethers"
 import { useEffect, useState } from "react"
-import { Card, useNotification, Button, Form } from "web3uikit"
+import { Input, useNotification, Button } from "web3uikit"
 import { GetAmountOfTokenUtil, GetReserveUtil, AddLiquidityUtil } from "../utils/dexFunctions"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -19,14 +19,9 @@ export default function Home() {
 
     const [ethAmountToAdd, setEthAmountToAdd] = useState("")
     const [cdTokenAmountToAdd, setCdTokenAmountToAdd] = useState("")
+    const [isLoading, setIsLoading] = useState(false)
 
     async function AddLiquidity(data) {
-        const ethAmountToAdd = data.data[0].inputResult
-        const cdTokenAmountToAdd = data.data[1].inputResult
-
-        setEthAmountToAdd(ethAmountToAdd)
-        setCdTokenAmountToAdd(cdTokenAmountToAdd)
-
         const liquidity = await AddLiquidityUtil(
             contractAddress,
             exchangeAbi,
@@ -54,41 +49,33 @@ export default function Home() {
         console.log(amountRecieved)
     }
 
-    async function ethToCDToken() {}
-
-    async function cdTokenToEth() {}
-
     return (
-        <div className=" content-center items-center h-100 gap-4">
-            <div className="flex flex-col items-center justify-center w-full h-full p-20">
-                <div className=" border-solid border-4 border-gray-200 rounded-lg flex flex-row justify-between w-1/2 h-12 px-5">
+        <div className="py-20 px-20">
+            <div className="flex flex-col items-center content-center space-y-8 border-4 rounded-lg border-gray-200 p-5">
+                <div className=" border-solid border-2 border-gray-200 rounded-lg flex flex-row justify-between w-2/3 p-5">
                     <h1 className="text-center text-2xl font-bold">Add liquidity</h1>
                 </div>
-                <div className="w-1/2 flex flex-col justify-center text-center">
-                    <Form
-                        className="flex flex-col justify-center items-center"
-                        buttonConfig={{
-                            theme: "primary",
-                            text: "Add Liquidity",
+                <div className="w-1/2 flex flex-col justify-center text-center space-y-4 p-2">
+                    <Input
+                        label="Add Eth"
+                        autoComplete
+                        onChange={(event) => {
+                            setEthAmountToAdd(event.target.value)
                         }}
-                        onSubmit={AddLiquidity}
-                        data={[
-                            {
-                                inputWidth: "30%",
-                                name: "Eth",
-                                type: "text",
-                                value: "",
-                                key: "EthValue",
-                            },
-                            {
-                                inputWidth: "30%",
-                                name: "CD Token",
-                                type: "text",
-                                value: "",
-                                key: "CDTokenValue",
-                            },
-                        ]}
-                        id="main form"
+                    />
+                    <Input
+                        label="Add CDToken"
+                        autoComplete
+                        onChange={(event) => {
+                            setCdTokenAmountToAdd(event.target.value)
+                        }}
+                    />
+                    <Button
+                        text="Liquidate"
+                        theme="colored"
+                        color="green"
+                        isLoading={isLoading}
+                        onClick={AddLiquidity}
                     />
                 </div>
             </div>
