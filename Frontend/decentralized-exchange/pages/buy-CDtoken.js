@@ -2,7 +2,6 @@ import styles from "../styles/Home.module.css"
 import { Card, Input, useNotification, Button, Information } from "web3uikit"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import { cryptoDevTokenAbi, contractAddresses } from "../constants/index"
-import { ethers } from "ethers"
 import { useEffect, useState } from "react"
 import { GetMinimumTokenMintUtil, GetTotalCDTokenOwnUtil, MintCryptoDevTokenUtil } from "../utils/CDTokenFunctions"
 
@@ -68,45 +67,49 @@ export default function MintCryptoDev() {
 
     return (
         <div className=" flex flex-col p-2 space-y-10">
-            <div className="flex flex-col p-2 place-content-evenly space-y-4">
+            <div className="flex flex-col p-2 place-content-evenly space-y-4 w-1/6">
                 <Information
                     className="p-5"
                     information={`${minTokenMint} CDT`}
                     topic="Minimum Token to mint"
-                    fontSize="text-2xl"
+                    fontSize="text-1xl"
                 />
                 <Information
                     className=""
                     information={`${currentCDOwned} CDT`}
-                    topic="Current CryptoDevToken Owned"
-                    fontSize="text-2xl"
+                    topic="Current CDT Owned"
+                    fontSize="text-1xl"
                 />
             </div>
 
-            <div className="px-10 space-y-5">
-                <h1 className="text-2xl font-bold text-sky-900">Mint CD Token</h1>
-                <Input
-                    label="CD Token"
-                    onChange={(event) => {
-                        setMintAmount(event.target.value)
-                    }}
-                />
-                <Input
-                    label="Eth Value"
-                    onChange={(event) => {
-                        setEthValue(event.target.value)
-                    }}
-                />
-                <Button
-                    text="Mint"
-                    color="green"
-                    theme="colored"
-                    isLoading={disableButton}
-                    onClick={() => {
-                        setDisableButton(true)
-                        MintCryptoDevToken()
-                    }}
-                />
+            <div className=" flex items-center justify-center">
+                <div className="p-5 space-y-5 flex flex-col justify-center items-center rounded-lg border-2 w-1/2">
+                    <h1 className="text-2xl font-bold text-sky-900">Mint CD Token</h1>
+                    <div className="w-1/2 flex flex-col justify-center text-center space-y-4 p-2">
+                        <Input
+                            label="CD Token"
+                            onChange={(event) => {
+                                setMintAmount(event.target.value)
+                            }}
+                        />
+                        <Input
+                            label="Eth Value"
+                            onChange={(event) => {
+                                setEthValue(event.target.value)
+                            }}
+                        />
+                        <Button
+                            text="Mint"
+                            color="green"
+                            theme="colored"
+                            isLoading={disableButton}
+                            onClick={() => {
+                                setDisableButton(true)
+                                MintCryptoDevToken()
+                            }}
+                        />
+                    </div>
+                </div>
             </div>
         </div>
     )

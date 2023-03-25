@@ -1,5 +1,21 @@
 import { ethers } from "ethers"
 
+async function GetEthInContractUtil(contractAddress, contractAbi, runContractFunction) {
+    const getEthInContractOpt = {
+        abi: contractAbi,
+        contractAddress: contractAddress,
+        functionName: "getEthInContract",
+    }
+
+    const ethInContract = await runContractFunction({
+        params: getEthInContractOpt,
+        onSuccess: (result) => console.log(result),
+        onError: (error) => console.log(error),
+    })
+    const ethInContractWei = ethers.utils.formatEther(ethInContract)
+    return ethInContractWei
+}
+
 async function GetReserveUtil(constractAddress, contractAbi, runContractFunction) {
     const getReserveOpt = {
         abi: contractAbi,
@@ -15,7 +31,14 @@ async function GetReserveUtil(constractAddress, contractAbi, runContractFunction
     return CDBalanceInDex
 }
 
-async function AddLiquidityUtil(contractAddress, contractAbi, ethAmountToAdd, CDTokenAmountToAdd, runContractFunction) {
+async function AddLiquidityUtil(
+    contractAddress,
+    contractAbi,
+    ethAmountToAdd,
+    CDTokenAmountToAdd,
+    runContractFunction,
+    handleSuccess
+) {
     const ethAmountToAddWei = ethers.utils.parseEther(ethAmountToAdd)
     const CDTokenAmountToAddWei = ethers.utils.parseEther(CDTokenAmountToAdd)
 
@@ -29,7 +52,7 @@ async function AddLiquidityUtil(contractAddress, contractAbi, ethAmountToAdd, CD
 
     const liquidity = await runContractFunction({
         params: addLiquidityOpt,
-        onSuccess: (result) => console.log(result),
+        onSuccess: handleSuccess,
         OnError: (error) => console.log(error),
     })
     return liquidity
@@ -59,4 +82,4 @@ async function GetAmountOfTokenUtil(
     return toTokenRecievedWei
 }
 
-export { GetReserveUtil, AddLiquidityUtil, GetAmountOfTokenUtil }
+export { GetReserveUtil, AddLiquidityUtil, GetAmountOfTokenUtil, GetEthInContractUtil }
