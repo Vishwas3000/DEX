@@ -20,7 +20,7 @@ export default function MintCryptoDev() {
 
     const dispatch = useNotification()
 
-    const contractAddress = contractAddresses[chainIdString].CryptoDevToken[0]
+    const contractAddress = contractAddresses[chainIdString]["CryptoDevToken"][0]
 
     useEffect(() => {
         GetMinimumTokenMint()
@@ -39,6 +39,7 @@ export default function MintCryptoDev() {
             runContractFunction,
             account
         )
+        console.log("current CD owwner", currentCDOwned)
         setCurrentCDOwned(currentCDOwned)
     }
 

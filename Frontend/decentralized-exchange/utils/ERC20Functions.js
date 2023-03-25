@@ -19,7 +19,7 @@ async function GetCurrentAllowanceUtil(
         onError: (error) => console.log(error),
     })
     const allowance = ethers.utils.formatEther(allowanceWei)
-    console.log("allowance: ", allowance)
+    // console.log("allowance: ", allowance)
     return allowance
 }
 

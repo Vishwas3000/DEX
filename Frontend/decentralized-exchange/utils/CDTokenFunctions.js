@@ -23,16 +23,15 @@ async function GetTotalCDTokenOwnUtil(contractAbi, contractAddress, runContractF
         functionName: "balanceOf",
         params: { account: account },
     }
-    console.log("account: ", account)
 
-    const CDOwned = await runContractFunction({
+    const CDOwnedWei = await runContractFunction({
         params: currentCDOwnedOpt,
         onSuccess: (result) => console.log(result),
         onError: (error) => console.log(error),
     })
+    const CDOwned = ethers.utils.formatEther(CDOwnedWei)
     console.log("CDOwned: ", CDOwned)
-    const CDOwnedWei = ethers.utils.formatEther(CDOwned)
-    return CDOwnedWei
+    return CDOwned
 }
 
 async function MintCryptoDevTokenUtil(
@@ -49,13 +48,14 @@ async function MintCryptoDevTokenUtil(
     console.log("eth sent " + EthValue + " Eth")
 
     const EthValueWei = ethers.utils.parseEther(EthValue)
+    const mintAmountWei = ethers.utils.parseEther(mintAmount)
 
     const mintOption = {
         abi: contractAbi,
         contractAddress: contractAddress,
         functionName: "mint",
         msgValue: EthValueWei,
-        params: { amount: mintAmount },
+        params: { amount: mintAmountWei },
     }
 
     await runContractFunction({

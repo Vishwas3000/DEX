@@ -7,8 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract CryptoDevToken is ERC20, Ownable {
     uint256 public constant TOKEN_PRICE = 0.001 ether;
-    uint256 public constant TOKEN_PER_NFT = 10 * 10 ** 18;
-    uint256 public constant MIN_TOKEN_TO_MINT = 10;
+    uint256 public constant MIN_TOKEN_TO_MINT = 10 ;
     uint256 public constant MAX_SUPPLY_LIMIT = 10000 * 10 ** 18;
 
     mapping(uint256 => bool) public isTokenIdClimed;
@@ -18,10 +17,9 @@ contract CryptoDevToken is ERC20, Ownable {
     function mint(uint256 amount) public payable {
         require(msg.value >= TOKEN_PRICE * MIN_TOKEN_TO_MINT, "Not enough Ether sent");
 
-        uint256 amountWithDecimals = amount * 10 ** 18;
-        require((totalSupply() + amountWithDecimals) <= MAX_SUPPLY_LIMIT, "Exceeds the max total supply available.");
+        require((totalSupply() + amount) <= MAX_SUPPLY_LIMIT, "Exceeds the max total supply available.");
 
-        _mint(msg.sender, amountWithDecimals);
+        _mint(msg.sender, amount);
     }
 
     function withdraw() public onlyOwner {

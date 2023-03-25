@@ -23,11 +23,11 @@ async function GetReserveUtil(constractAddress, contractAbi, runContractFunction
         functionName: "getReserve",
     }
 
-    const CDBalanceInDex = await runContractFunction({
+    const CDBalanceInDexWei = await runContractFunction({
         params: getReserveOpt,
-        onSuccess: (result) => console.log(result),
         onError: (error) => console.log(error),
     })
+    const CDBalanceInDex = ethers.utils.formatEther(CDBalanceInDexWei)
     return CDBalanceInDex
 }
 
@@ -50,11 +50,15 @@ async function AddLiquidityUtil(
         params: { _amount: CDTokenAmountToAddWei },
     }
 
-    const liquidity = await runContractFunction({
+    const result = await runContractFunction({
         params: addLiquidityOpt,
         onSuccess: handleSuccess,
         OnError: (error) => console.log(error),
     })
+
+    const liquidity = ethers.utils.formatEther(result.value)
+    console.log("liquidity", liquidity)
+
     return liquidity
 }
 

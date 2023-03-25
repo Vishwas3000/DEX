@@ -1,31 +1,43 @@
 import { Chicle, Inter } from "next/font/google"
-import { useMoralis, useWeb3Contract } from "react-moralis"
-import { exchangeAbi, contractAddresses } from "../constants/index"
+import { useMoralis, useWeb3Contract, useERC20Balances } from "react-moralis"
+import { exchangeAbi, contractAddresses, cryptoDevTokenAbi } from "../constants/index"
 import { ethers } from "ethers"
 import { useEffect, useState } from "react"
 import { Input, useNotification, Button, Information } from "web3uikit"
 import { GetAmountOfTokenUtil, GetReserveUtil, AddLiquidityUtil } from "../utils/dexFunctions"
 import { GetCurrentAllowanceUtil } from "@/utils/ERC20Functions"
-
-const inter = Inter({ subsets: ["latin"] })
+import { GetEthBalanceUtil } from "@/utils/ethBalance"
 
 export default function Home() {
     const { isWeb3Enabled, chainId, account } = useMoralis()
     const chainIdString = chainId ? parseInt(chainId).toString() : "31337"
 
-    const contractAddress = contractAddresses[chainIdString]["Exchange"][0]
+    const exchangeAddress = contractAddresses[chainIdString]["Exchange"][0]
+    const CDTAddress = contractAddresses[chainIdString]["CryptoDevToken"][0]
+
     const dispatch = useNotification()
 
     const { runContractFunction } = useWeb3Contract()
+    const { fetchERC20Balances, data, isLoading, isFetching, error } = useERC20Balances()
 
     const [ethAmountToAdd, setEthAmountToAdd] = useState("")
     const [cdTokenAmountToAdd, setCdTokenAmountToAdd] = useState("")
-    const [isLoading, setIsLoading] = useState(false)
+    const [isLiqLoading, setIsLiqLoading] = useState(false)
     const [currentAllowance, setCurrentAllowance] = useState(0)
+    const [minCDTAmountToSend, setMinCDTAmountToSend] = useState("")
+    const [ethInReserve, setEthInReserve] = useState("")
+    const [cdtInReserve, setCdtInReserve] = useState("")
+
+    useEffect(() => {
+        GetCurrentAllowance()
+        GetCDTReserve()
+        GetEthReserve()
+        GetMinCDTAmountForEth()
+    }, [isWeb3Enabled, isLiqLoading, ethAmountToAdd])
 
     async function AddLiquidity() {
         const liquidity = await AddLiquidityUtil(
-            contractAddress,
+            exchangeAddress,
             exchangeAbi,
             ethAmountToAdd,
             cdTokenAmountToAdd,
@@ -37,30 +49,50 @@ export default function Home() {
 
     async function GetCurrentAllowance() {
         const allowance = await GetCurrentAllowanceUtil(
-            contractAddress,
-            exchangeAbi,
+            CDTAddress,
+            cryptoDevTokenAbi,
             runContractFunction,
             account,
-            contractAddress
+            exchangeAddress
         )
         setCurrentAllowance(allowance)
     }
 
-    async function GetReserve() {
-        const reserve = await GetReserveUtil(contractAddress, exchangeAbi, runContractFunction)
-        console.log(reserve)
+    async function GetCDTReserve() {
+        const CDTInreserve = await GetReserveUtil(exchangeAddress, exchangeAbi, runContractFunction)
+        console.log("CDT reserve: ", CDTInreserve)
+        setCdtInReserve(CDTInreserve)
+        return CDTInreserve
     }
 
-    async function GetAmountOfToken(fromTokenAmount, fromTokenReserve, toTokenReserve) {
-        const amountRecieved = await GetAmountOfTokenUtil(
-            contractAddress,
+    async function GetAmountOfToken(ethAmountToAdd, ethInContract, cdtInReserve) {
+        const minCdtToSend = await GetAmountOfTokenUtil(
+            exchangeAddress,
             exchangeAbi,
-            fromTokenAmount,
-            fromTokenReserve,
-            toTokenReserve,
+            ethAmountToAdd,
+            ethInContract,
+            cdtInReserve,
             runContractFunction
         )
-        console.log(amountRecieved)
+        console.log(minCdtToSend)
+        return minCdtToSend
+    }
+
+    async function GetEthReserve() {
+        const ethInReserve = await GetEthBalanceUtil(exchangeAddress)
+        setEthInReserve(ethInReserve)
+        console.log("eth in reserve: ", ethInReserve)
+        return ethInReserve
+    }
+
+    async function GetMinCDTAmountForEth() {
+        const ethInReserve = await GetEthReserve()
+        const cdtInReserve = await GetCDTReserve()
+        const minCDTAmount = (cdtInReserve * ethAmountToAdd) / ethInReserve // eth in reserve
+        setMinCDTAmountToSend(minCDTAmount)
+        console.log("min cdt amount to send: ", minCDTAmount)
+
+        return minCDTAmount
     }
 
     async function handleSuccess(tx) {
@@ -71,7 +103,7 @@ export default function Home() {
             position: "topR",
             message: `Liquidity added to the pool`,
         })
-        setIsLoading(false)
+        setIsLiqLoading(false)
     }
 
     return (
@@ -83,13 +115,16 @@ export default function Home() {
                 <div className="flex flex-col items-center space-y-5 border-2 rounded-lg border-gray-200 p-5 w-1/2">
                     <h1 className="text-center text-2xl text-sky-900 font-bold">Add liquidity</h1>
                     <div className="w-1/2 flex flex-col justify-center text-center space-y-4 p-2">
-                        <Input
-                            label="Add Eth"
-                            autoComplete
-                            onChange={(event) => {
-                                setEthAmountToAdd(event.target.value)
-                            }}
-                        />
+                        <div className=" flex flex-col justify-start items-start">
+                            <Input
+                                label="Add Eth"
+                                autoComplete
+                                onChange={(event) => {
+                                    setEthAmountToAdd(event.target.value)
+                                }}
+                            />
+                            <h3 className=" text-xs py-1 px-2">min CDT to send: {minCDTAmountToSend}</h3>
+                        </div>
                         <Input
                             label="Add CDToken"
                             autoComplete
@@ -101,10 +136,16 @@ export default function Home() {
                             text="Liquidate"
                             theme="colored"
                             color="green"
-                            isLoading={isLoading}
+                            isLoading={isLiqLoading}
                             onClick={() => {
-                                setIsLoading(true)
+                                setIsLiqLoading(true)
                                 AddLiquidity()
+                            }}
+                        />
+                        <Button
+                            text="eth reserve"
+                            onClick={() => {
+                                GetEthReserve()
                             }}
                         />
                     </div>
