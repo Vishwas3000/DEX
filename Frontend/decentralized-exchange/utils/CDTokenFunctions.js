@@ -65,4 +65,26 @@ async function MintCryptoDevTokenUtil(
     })
 }
 
-export { GetMinimumTokenMintUtil, GetTotalCDTokenOwnUtil, MintCryptoDevTokenUtil }
+async function GetBalanceOfAccountUtil(contractAddress, contractAbi, runContractFunction, accountAddress) {
+    const balanceOfAccountOpt = {
+        abi: contractAbi,
+        contractAddress: contractAddress,
+        functionName: "balanceOf",
+        params: { account: accountAddress },
+    }
+
+    const balanceOfAccountWei = await runContractFunction({
+        params: balanceOfAccountOpt,
+        onError: (error) => console.log(error),
+    })
+
+    if (balanceOfAccountWei != null) {
+        const balanceOfAccount = ethers.utils.formatEther(balanceOfAccountWei)
+        console.log("balanceOfAccount: ", balanceOfAccount)
+        return balanceOfAccount
+    }
+    console.log("balanceOfAccount: ", null)
+    return
+}
+
+export { GetMinimumTokenMintUtil, GetTotalCDTokenOwnUtil, MintCryptoDevTokenUtil, GetBalanceOfAccountUtil }

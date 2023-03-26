@@ -25,7 +25,7 @@ export default function MintCryptoDev() {
     useEffect(() => {
         GetMinimumTokenMint()
         GetTotalCDTokenOwn()
-    }, [isWeb3Enabled, mintAmount])
+    }, [isWeb3Enabled, mintAmount, account])
 
     async function GetMinimumTokenMint() {
         const minTokenMint = await GetMinimumTokenMintUtil(cryptoDevTokenAbi, contractAddress, runContractFunction)
@@ -77,7 +77,7 @@ export default function MintCryptoDev() {
                 />
                 <Information
                     className=""
-                    information={`${currentCDOwned} CDT`}
+                    information={`${parseFloat(currentCDOwned).toFixed(2)} CDT`}
                     topic="Current CDT Owned"
                     fontSize="text-1xl"
                 />

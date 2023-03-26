@@ -171,6 +171,26 @@ async function CDTToEthSwapUtil(
     })
 }
 
+async function GetCDTBalanceOfInDexUtil(exchangeAddress, contractAbi, accountAddress, runContractFunction) {
+    const getCDTBalanceOfInDexOpt = {
+        abi: contractAbi,
+        contractAddress: exchangeAddress,
+        functionName: "balanceOf",
+        params: { account: accountAddress },
+    }
+
+    const CDBalanceInDexWei = await runContractFunction({
+        params: getCDTBalanceOfInDexOpt,
+        onError: (error) => console.log(error),
+    })
+    if (CDBalanceInDexWei != null) {
+        const CDBalanceInDex = ethers.utils.formatEther(CDBalanceInDexWei)
+        return CDBalanceInDex
+    }
+    console.log("CDBalanceInDexWei is null")
+    return
+}
+
 export {
     GetReserveUtil,
     AddLiquidityUtil,
@@ -179,4 +199,5 @@ export {
     RemoveLiquidityUtil,
     EthToCDTSwapUtil,
     CDTToEthSwapUtil,
+    GetCDTBalanceOfInDexUtil,
 }

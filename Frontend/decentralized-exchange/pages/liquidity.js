@@ -1,10 +1,16 @@
 import { Chicle, Inter } from "next/font/google"
-import { useMoralis, useWeb3Contract, useERC20Balances } from "react-moralis"
+import { useMoralis, useWeb3Contract } from "react-moralis"
 import { exchangeAbi, contractAddresses, cryptoDevTokenAbi } from "../constants/index"
 import { ethers } from "ethers"
 import { useEffect, useState } from "react"
 import { Input, useNotification, Button, Information } from "web3uikit"
-import { GetAmountOfTokenUtil, GetReserveUtil, AddLiquidityUtil, RemoveLiquidityUtil } from "../utils/dexFunctions"
+import {
+    GetCDTBalanceOfInDexUtil,
+    GetAmountOfTokenUtil,
+    GetReserveUtil,
+    AddLiquidityUtil,
+    RemoveLiquidityUtil,
+} from "../utils/dexFunctions"
 import { GetCurrentAllowanceUtil } from "@/utils/ERC20Functions"
 import { GetEthBalanceUtil } from "@/utils/ethBalance"
 
@@ -18,7 +24,6 @@ export default function Home() {
     const dispatch = useNotification()
 
     const { runContractFunction } = useWeb3Contract()
-    const { fetchERC20Balances, data, isLoading, isFetching, error } = useERC20Balances()
 
     const [ethAmountToAdd, setEthAmountToAdd] = useState("")
     const [cdTokenAmountToAdd, setCdTokenAmountToAdd] = useState("")
@@ -26,6 +31,8 @@ export default function Home() {
     const [currentAllowance, setCurrentAllowance] = useState(0)
     const [minCDTAmountToSend, setMinCDTAmountToSend] = useState("")
     const [cdTokenAmountToRemove, setCdTokenAmountToRemove] = useState("")
+    const [ethAccountBal, setEthAccountBal] = useState("")
+    const [cdlpBalance, setCdlpBalance] = useState("")
 
     const [addRemove, setAddRemove] = useState(true)
 
@@ -33,8 +40,10 @@ export default function Home() {
         GetCurrentAllowance()
         GetCDTReserve()
         GetEthReserve()
+        GetEthAccountBal()
         GetMinCDTAmountForEth()
-    }, [isWeb3Enabled, isLiqLoading, ethAmountToAdd])
+        GetCDTBalanceOfInDex()
+    }, [isWeb3Enabled, isLiqLoading, ethAmountToAdd, account])
 
     async function AddLiquidity() {
         const liquidity = await AddLiquidityUtil(
@@ -56,6 +65,7 @@ export default function Home() {
             runContractFunction,
             handleRemoveLiqSuccess
         )
+        console.log("Removed: ", result)
     }
 
     async function GetCurrentAllowance() {
@@ -81,6 +91,20 @@ export default function Home() {
         return ethInReserve
     }
 
+    async function GetEthAccountBal() {
+        const ethBal = await GetEthBalanceUtil(account)
+        console.log("eth bal: ", ethBal)
+        setEthAccountBal(ethBal)
+        return ethBal
+    }
+
+    async function GetCDTBalanceOfInDex() {
+        const cdtBal = await GetCDTBalanceOfInDexUtil(exchangeAddress, exchangeAbi, account, runContractFunction)
+        console.log("cdt bal in dex: ", cdtBal)
+        setCdlpBalance(cdtBal)
+        return cdtBal
+    }
+
     async function GetMinCDTAmountForEth() {
         const ethInReserve = await GetEthReserve()
         const cdtInReserve = await GetCDTReserve()
@@ -97,18 +121,23 @@ export default function Home() {
             type: "success",
             title: "Liqiudity Added",
             position: "topR",
-            message: `Liquidity added to the pool`,
+            message: `${ethAmountToAdd} ETH and ${cdTokenAmountToAdd} CDToken added to the pool`,
         })
         setIsLiqLoading(false)
     }
 
     async function handleRemoveLiqSuccess(tx) {
-        await tx.wait(1)
+        const txReciept = await tx.wait(1)
+        console.log("transaction reciept", txReciept)
+        const ethRemoved = ethers.utils.formatEther(txReciept.events[2].args["ethAmount"])
+        const cdtRemoved = ethers.utils.formatEther(txReciept.events[2].args["CDAmount"])
         dispatch({
             type: "success",
-            title: "Liqiudity Added",
+            title: "Liqiudity Removed",
             position: "topR",
-            message: `Liquidity added to the pool`,
+            message: `${parseFloat(ethRemoved).toFixed(1)} ETH & ${parseFloat(cdtRemoved).toFixed(
+                1
+            )} CD removed from the pool`,
         })
         setIsLiqLoading(false)
     }
@@ -116,8 +145,10 @@ export default function Home() {
     return (
         <div className="p-2 space-y-10 flex flex-col">
             <div className="flex flex-row">
-                <div className="w-1/6 flex items-start p-2">
-                    <Information topic="Your Current Allowance" information={currentAllowance} />
+                <div className="w-1/6 flex flex-col items-start p-2 space-y-5">
+                    <Information topic="Your CD Allowance" information={`${currentAllowance} CDT`} />
+                    <Information topic="Your CDLP" information={`${parseFloat(cdlpBalance).toFixed(3)} CDLP`} />
+                    <Information topic="Your ETH" information={`${parseFloat(ethAccountBal).toFixed(1)} ETH`} />
                 </div>
                 <div className="flex flex-row relative left-1/4 space-x-10 h-20 items-center p-2">
                     <Button
@@ -136,7 +167,7 @@ export default function Home() {
                     />
                 </div>
             </div>
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center relative bottom-52">
                 {addRemove ? (
                     <div className="flex flex-col items-center space-y-5 border-2 rounded-lg border-gray-200 p-5 w-1/2">
                         <h1 className="text-center text-2xl text-sky-900 font-bold">Add liquidity</h1>
@@ -177,7 +208,7 @@ export default function Home() {
                         <h1 className="text-center text-2xl text-sky-900 font-bold">Remove liquidity</h1>
                         <div className="w-1/2 flex flex-col justify-center text-center space-y-4 p-2">
                             <Input
-                                label="Add CDToken"
+                                label="Add CDLP Token"
                                 autoComplete
                                 onChange={(event) => {
                                     setCdTokenAmountToRemove(event.target.value)

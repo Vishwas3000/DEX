@@ -34,7 +34,7 @@ export default function Home() {
         GetCurrentAllowence()
         GetCDTReserve()
         GetEthReserve(exchangeAddress)
-    }, [isWeb3Enabled])
+    }, [isWeb3Enabled, account, isSwapping])
 
     useEffect(() => {
         GetAmountOfCDT()
@@ -70,7 +70,6 @@ export default function Home() {
 
     async function GetCDTReserve() {
         const reserve = await GetReserveUtil(exchangeAddress, exchangeAbi, runContractFunction)
-        // console.log("reserve", reserve)
         setCDTReserve(reserve)
         return reserve
     }
@@ -121,11 +120,13 @@ export default function Home() {
         )
     }
 
-    async function handleSuccess() {
+    async function handleSuccess(tx) {
+        await tx.wait(1)
         dispatch({
             type: "success",
-            title: "Transaction Successful",
-            description: "Transaction was successful",
+            title: "Token Swapped",
+            position: "topR",
+            message: "Token has swapped successfully",
         })
         setIsSwapping(false)
     }
@@ -137,8 +138,8 @@ export default function Home() {
                     <Information topic="Your Current Allowance" information={`${currentCDTAllowed} CDT`} style />
                 </div>
                 <div className="flex flex-col space-y-2 absolute right-5 w-1/6">
-                    <Information topic="Eth Reserve" information={`${ethReserve} ETH`} />
-                    <Information topic="CDT Reserve " information={`${CDTReserve} CDT`} />
+                    <Information topic="Eth Reserve" information={`${parseFloat(ethReserve).toFixed(1)} ETH`} />
+                    <Information topic="CDT Reserve " information={`${parseFloat(CDTReserve).toFixed(1)} CDT`} />
                 </div>
             </div>
             <div className="flex items-center justify-center">
@@ -197,7 +198,7 @@ export default function Home() {
                         </div>
                     )}
                 </div>
-                <div className=" absolute h-25 right-1/3">
+                <div className=" absolute h-25 right-1/3 border-4 hover:border-dotted rounded-2xl ">
                     <Button
                         icon={<Image src={arrow} />}
                         iconColor="green"

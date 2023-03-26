@@ -7,6 +7,9 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 contract Exchange is ERC20 {
     address private cryptoDevTokenAddress;
 
+    event LiquidityRemoved(uint256 ethAmount, uint256 CDAmount);
+    event LiquidityAdded(uint256 ethAmount, uint256 CDAmount);
+
     constructor(address _CryptoDevtoken) ERC20("CryptoDev LP Token", "CDLP") {
         require(_CryptoDevtoken != address(0), "Token address passed is a null address");
         cryptoDevTokenAddress = _CryptoDevtoken;
@@ -34,6 +37,7 @@ contract Exchange is ERC20 {
             liquidity = (totalSupply() * msg.value) / ethReserve;
             _mint(msg.sender, liquidity);
         }
+        emit LiquidityAdded(msg.value, _amount);
         return liquidity;
     }
 
@@ -51,6 +55,7 @@ contract Exchange is ERC20 {
         require(sent, "Transaction failed");
 
         ERC20(cryptoDevTokenAddress).transfer(msg.sender, cryptoDevTokenAmount);
+        emit LiquidityRemoved(ethAmount, cryptoDevTokenAmount);
         return (ethAmount, cryptoDevTokenAmount);
     }
 
@@ -77,7 +82,7 @@ contract Exchange is ERC20 {
         ERC20(cryptoDevTokenAddress).transfer(msg.sender, tokenBought);
     }
 
-    function cryptoDevToeth(uint256 _tokenSold, uint256 _minEth) public {
+    function cryptoDevToEth(uint256 _tokenSold, uint256 _minEth) public {
         uint256 ethBought = getAmountOfToken(_tokenSold, getReserve(), address(this).balance);
         require(ethBought >= _minEth, "insufficient output amount");
 
