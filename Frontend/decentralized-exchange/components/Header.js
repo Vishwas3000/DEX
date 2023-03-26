@@ -7,13 +7,13 @@ export default function Header() {
             <h1 className="py-4 px-4 font-bold text-3xl">Decentralized Exchange</h1>
             <div className="flex flex-row items-center">
                 <Link href="/" className="mr-4 p-6">
-                    Home
+                    Swap
                 </Link>
                 <Link href="/buy-CDtoken" className="mr-4 p-6">
                     Buy CD Token
                 </Link>
-                <Link href="/add-Liquidity" className="mr-4 p-6">
-                    Add Liquidity
+                <Link href="/liquidity" className="mr-4 p-6">
+                    Liquidity
                 </Link>
                 <Link href="/requestAllowance" className="mr-4 p-6">
                     Request Allowance

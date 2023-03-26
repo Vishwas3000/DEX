@@ -62,19 +62,47 @@ async function AddLiquidityUtil(
     return liquidity
 }
 
+async function RemoveLiquidityUtil(
+    contractAddress,
+    contractAbi,
+    liquidityToRemove,
+    runContractFunction,
+    handleSuccess
+) {
+    const liquidityToRemoveWei = ethers.utils.parseEther(liquidityToRemove)
+
+    const removeLiquidityOpt = {
+        abi: contractAbi,
+        contractAddress: contractAddress,
+        functionName: "removeLiquidity",
+        params: { _amount: liquidityToRemoveWei },
+    }
+
+    const result = await runContractFunction({
+        params: removeLiquidityOpt,
+        onSuccess: handleSuccess,
+        OnError: (error) => console.log(error),
+    })
+    console.log("liquidity removed", result)
+}
+
 async function GetAmountOfTokenUtil(
-    constractAddress,
+    exchangeAddress,
     contractAbi,
     fromTokenAmount,
     fromTokenReserve,
     toTokenReserve,
     runContractFunction
 ) {
+    const inputAmountWei = ethers.utils.parseEther(fromTokenAmount)
+    const fromReserveWei = ethers.utils.parseEther(fromTokenReserve)
+    const toReserveWei = ethers.utils.parseEther(toTokenReserve)
+
     const getAmountOfTokenOpt = {
+        contractAddress: exchangeAddress,
         abi: contractAbi,
-        contractAddress: contractAddress,
         functionName: "getAmountOfToken",
-        params: { inputAmount: fromTokenAmount, inputReserve: fromTokenReserve, outputReserve: toTokenReserve },
+        params: { inputAmount: inputAmountWei, inputReserve: fromReserveWei, outputReserve: toReserveWei },
     }
 
     const toTokenRecieved = await runContractFunction({
@@ -86,4 +114,4 @@ async function GetAmountOfTokenUtil(
     return toTokenRecievedWei
 }
 
-export { GetReserveUtil, AddLiquidityUtil, GetAmountOfTokenUtil, GetEthInContractUtil }
+export { GetReserveUtil, AddLiquidityUtil, GetAmountOfTokenUtil, GetEthInContractUtil, RemoveLiquidityUtil }

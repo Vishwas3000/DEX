@@ -1,88 +1,177 @@
-import Head from "next/head"
-import Image from "next/image"
 import { Chicle, Inter } from "next/font/google"
+import Image from "next/image"
+import arrow from "../public/arrow.png"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import { exchangeAbi, contractAddresses } from "../constants/index"
-import { ethers } from "ethers"
 import { useEffect, useState } from "react"
-import { Card, useNotification, Button, Form } from "web3uikit"
-
+import { useNotification, Button, Input, Information, Typography } from "web3uikit"
+import { GetCurrentAllowanceUtil } from "@/utils/ERC20Functions"
+import { GetAmountOfTokenUtil, GetReserveUtil } from "@/utils/dexFunctions"
+import { GetEthBalanceUtil } from "@/utils/ethBalance"
 const inter = Inter({ subsets: ["latin"] })
 
 export default function Home() {
     const { isWeb3Enabled, chainId, account } = useMoralis()
     const chainIdString = chainId ? parseInt(chainId).toString() : "31337"
 
-    const contractAddress = contractAddresses[chainIdString]["Exchange"][0]
+    const exchangeAddress = contractAddresses[chainIdString]["Exchange"][0]
+    const cryptoDevAddress = contractAddresses[chainIdString]["CryptoDevToken"][0]
     const dispatch = useNotification()
 
     const { runContractFunction } = useWeb3Contract()
 
     const [ethAmountToSwap, setEthAmountToSwap] = useState("")
     const [cdTokenAmountToSwap, setCdTokenAmountToSwap] = useState("")
+    const [isSwapping, setIsSwapping] = useState(false)
+    const [currentCDTAllowed, setCurrentCDTAllowed] = useState("")
+    const [CDTInreserve, setCDTInreserve] = useState("")
+    const [swapChange, setSwapChange] = useState(false)
+    const [ethAmountToGet, setEthAmountToGet] = useState("")
+    const [cdTokenAmountToGet, setCdTokenAmountToGet] = useState("")
 
-    async function AddLiquidity() {
-        const addLiquidityOpt = {
-            abi: exchangeAbi,
-            contractAddress: contractAddress,
-            functionName: "addLiquidity",
-            msgValue: ethers.utils.parseEther(ethAmountToSwap),
-            params: { _amount: ethers.utils.parseEther(cdTokenAmountToSwap) },
-        }
+    useEffect(() => {
+        GetCurrentAllowence()
+        GetReserve()
+    }, [isWeb3Enabled])
 
-        await runContractFunction({
-            params: addLiquidityOpt,
-            onSuccess: (result) => console.log(result),
-            OnError: (error) => console.log(error),
-        })
+    useEffect(() => {
+        GetAmountOfCDT()
+    }, [ethAmountToSwap])
+
+    useEffect(() => {
+        GetAmountofETH()
+    }, [cdTokenAmountToSwap])
+
+    async function GetCurrentAllowence() {
+        const currentAllowence = await GetCurrentAllowanceUtil(
+            cryptoDevAddress,
+            exchangeAbi,
+            runContractFunction,
+            account,
+            exchangeAddress
+        )
+        console.log("current Allowance", currentAllowence)
+        setCurrentCDTAllowed(currentAllowence)
+    }
+
+    async function GetAmountOfToken(fromTokenAmount, fromTokenReserve, toTokenReserve) {
+        const result = await GetAmountOfTokenUtil(
+            exchangeAddress,
+            exchangeAbi,
+            fromTokenAmount,
+            fromTokenReserve,
+            toTokenReserve,
+            runContractFunction
+        )
+        return result
     }
 
     async function GetReserve() {
-        const getReserveOpt = {
-            abi: exchangeAbi,
-            contractAddress: contractAddress,
-            functionName: "getReserve",
-        }
+        const reserve = await GetReserveUtil(exchangeAddress, exchangeAbi, runContractFunction)
+        console.log("reserve", reserve)
+        setCDTInreserve(reserve)
+        return reserve
+    }
 
-        await runContractFunction({
-            params: getReserveOpt,
-            onSuccess: (result) => console.log(result),
-            OnError: (error) => console.log(error),
-        })
+    async function GetAmountOfCDT() {
+        const ethInReserve = await GetEthBalanceUtil(exchangeAddress)
+
+        console.log("input", ethAmountToSwap)
+
+        const CDTReturn = await GetAmountOfToken(ethAmountToSwap, ethInReserve, CDTInreserve)
+        console.log("CDT Return", CDTReturn)
+        setCdTokenAmountToGet(CDTReturn)
+    }
+
+    async function GetAmountofETH() {
+        const ethInReserve = await GetEthBalanceUtil(exchangeAddress)
+
+        const EthReturn = await GetAmountOfToken(cdTokenAmountToSwap, CDTInreserve, ethInReserve)
+        console.log("ETH Return", EthReturn)
+        setEthAmountToGet(EthReturn)
+    }
+
+    async function Swap() {
+        const result = await SwapUtil(
+            exchangeAddress,
+            exchangeAbi,
+            ethAmountToSwap,
+            cdTokenAmountToSwap,
+            runContractFunction,
+            handleSwapSuccess
+        )
     }
 
     return (
-        <div className=" content-center items-center h-100 gap-4">
-            <div className="flex flex-col items-center justify-center w-full h-full p-20">
-                <div className=" border-solid border-4 border-gray-200 rounded-lg flex flex-row justify-between w-1/2 h-12 px-5">
-                    <h1 className="text-center text-3xl font-bold">Swap</h1>
-                    <Image src="/logo.png" alt="swap" width={100} height={100} />
+        <div className="p-2 space-y-10 flex flex-col">
+            <div className="w-1/6 flex items-start p-2">
+                <Information topic="Your Current Allowance" information={`${currentCDTAllowed} CDT`} />
+            </div>
+            <div className="flex items-center justify-center">
+                <div className="flex flex-col items-center space-y-5 border-2 rounded-lg border-gray-200 p-5 w-1/2">
+                    <h1 className="text-center text-2xl text-sky-900 font-bold">Swap</h1>
+                    {swapChange ? (
+                        <div className="w-1/2 flex flex-col justify-center text-center space-y-4 p-2">
+                            <Input
+                                label="Eth value"
+                                onChange={(event) => {
+                                    setEthAmountToSwap(event.target.value)
+                                }}
+                                autoComplete="on"
+                            />
+                            <div className=" text-left px-2">
+                                <p className=" text-xm text-sky-900 font-bold">
+                                    Get: {isNaN(cdTokenAmountToGet) ? 0 : parseFloat(cdTokenAmountToGet).toFixed(4)} CDT
+                                </p>
+                            </div>
+                            <Button
+                                text="Swap"
+                                theme="colored"
+                                color="green"
+                                isLoading={isSwapping}
+                                onClick={() => {}}
+                            />
+                        </div>
+                    ) : (
+                        <div className="w-1/2 flex flex-col justify-center text-center space-y-4 p-2">
+                            <Input
+                                label="CD Token"
+                                onChange={(event) => {
+                                    setCdTokenAmountToSwap(event.target.value)
+                                    GetAmountOfEth()
+                                }}
+                                autoComplete="on"
+                            />
+                            <div className=" text-left px-2">
+                                <p className=" text-xm text-sky-900 font-bold">
+                                    Get: {isNaN(ethAmountToGet) ? 0 : parseFloat(ethAmountToGet).toFixed(4)} Eth
+                                </p>
+                            </div>
+                            <Button
+                                text="Swap"
+                                theme="colored"
+                                color="green"
+                                isLoading={isSwapping}
+                                onClick={() => {}}
+                            />
+                        </div>
+                    )}
                 </div>
-                <div className="w-1/2 flex flex-col justify-center text-center">
-                    <Form
-                        className="flex flex-col justify-center items-center"
-                        buttonConfig={{
-                            theme: "primary",
-                            text: "Swap",
+                <div className=" absolute h-25 right-1/3">
+                    <Button
+                        icon={<Image src={arrow} />}
+                        iconColor="green"
+                        iconLayout="icon-only"
+                        id="swap-button"
+                        loadingText="loading"
+                        onClick={() => {
+                            setSwapChange(!swapChange)
                         }}
-                        onSubmit={(data) => console.log(data)}
-                        data={[
-                            {
-                                inputWidth: "30%",
-                                name: "Eth",
-                                type: "text",
-                                value: "",
-                                key: "EthValue",
-                            },
-                            {
-                                inputWidth: "30%",
-                                name: "CD Token",
-                                type: "text",
-                                value: "",
-                                key: "CDTokenValue",
-                            },
-                        ]}
-                        id="main form"
+                        radius={0}
+                        size="regular"
+                        text="all the props"
+                        theme="colored"
+                        type="button"
                     />
                 </div>
             </div>

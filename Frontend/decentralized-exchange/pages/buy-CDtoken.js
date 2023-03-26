@@ -84,7 +84,7 @@ export default function MintCryptoDev() {
             </div>
 
             <div className=" flex items-center justify-center">
-                <div className="p-5 space-y-5 flex flex-col justify-center items-center rounded-lg border-2 w-1/2">
+                <div className="p-5 space-y-5 flex flex-col justify-center items-center rounded-lg border-2 w-1/2 absolute h-2/6">
                     <h1 className="text-2xl font-bold text-sky-900">Mint CD Token</h1>
                     <div className="w-1/2 flex flex-col justify-center text-center space-y-4 p-2">
                         <Input
