@@ -77,11 +77,11 @@ contract Exchange is ERC20 {
         ERC20(cryptoDevTokenAddress).transfer(msg.sender, tokenBought);
     }
 
-    function cryptoToeth(uint256 tokenSold, uint256 _minEth) public {
-        uint256 ethBought = getAmountOfToken(tokenSold, getReserve(), address(this).balance);
+    function cryptoDevToeth(uint256 _tokenSold, uint256 _minEth) public {
+        uint256 ethBought = getAmountOfToken(_tokenSold, getReserve(), address(this).balance);
         require(ethBought >= _minEth, "insufficient output amount");
 
-        ERC20(cryptoDevTokenAddress).transferFrom(msg.sender, address(this), tokenSold);
+        ERC20(cryptoDevTokenAddress).transferFrom(msg.sender, address(this), _tokenSold);
         (bool sent, ) = payable(msg.sender).call{value: ethBought}("");
         require(sent, "Transaction failed");
     }

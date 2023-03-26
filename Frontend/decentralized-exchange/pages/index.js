@@ -6,7 +6,7 @@ import { exchangeAbi, contractAddresses } from "../constants/index"
 import { useEffect, useState } from "react"
 import { useNotification, Button, Input, Information, Typography } from "web3uikit"
 import { GetCurrentAllowanceUtil } from "@/utils/ERC20Functions"
-import { GetAmountOfTokenUtil, GetReserveUtil } from "@/utils/dexFunctions"
+import { GetAmountOfTokenUtil, GetReserveUtil, EthToCDTSwapUtil, CDTToEthSwapUtil } from "@/utils/dexFunctions"
 import { GetEthBalanceUtil } from "@/utils/ethBalance"
 const inter = Inter({ subsets: ["latin"] })
 
@@ -24,14 +24,16 @@ export default function Home() {
     const [cdTokenAmountToSwap, setCdTokenAmountToSwap] = useState("")
     const [isSwapping, setIsSwapping] = useState(false)
     const [currentCDTAllowed, setCurrentCDTAllowed] = useState("")
-    const [CDTInreserve, setCDTInreserve] = useState("")
+    const [CDTReserve, setCDTReserve] = useState("")
     const [swapChange, setSwapChange] = useState(false)
     const [ethAmountToGet, setEthAmountToGet] = useState("")
     const [cdTokenAmountToGet, setCdTokenAmountToGet] = useState("")
+    const [ethReserve, setEthReserve] = useState("")
 
     useEffect(() => {
         GetCurrentAllowence()
-        GetReserve()
+        GetCDTReserve()
+        GetEthReserve(exchangeAddress)
     }, [isWeb3Enabled])
 
     useEffect(() => {
@@ -66,10 +68,16 @@ export default function Home() {
         return result
     }
 
-    async function GetReserve() {
+    async function GetCDTReserve() {
         const reserve = await GetReserveUtil(exchangeAddress, exchangeAbi, runContractFunction)
-        console.log("reserve", reserve)
-        setCDTInreserve(reserve)
+        // console.log("reserve", reserve)
+        setCDTReserve(reserve)
+        return reserve
+    }
+
+    async function GetEthReserve() {
+        const reserve = await GetEthBalanceUtil(exchangeAddress)
+        setEthReserve(reserve)
         return reserve
     }
 
@@ -78,7 +86,7 @@ export default function Home() {
 
         console.log("input", ethAmountToSwap)
 
-        const CDTReturn = await GetAmountOfToken(ethAmountToSwap, ethInReserve, CDTInreserve)
+        const CDTReturn = await GetAmountOfToken(ethAmountToSwap, ethInReserve, CDTReserve)
         console.log("CDT Return", CDTReturn)
         setCdTokenAmountToGet(CDTReturn)
     }
@@ -86,26 +94,52 @@ export default function Home() {
     async function GetAmountofETH() {
         const ethInReserve = await GetEthBalanceUtil(exchangeAddress)
 
-        const EthReturn = await GetAmountOfToken(cdTokenAmountToSwap, CDTInreserve, ethInReserve)
+        const EthReturn = await GetAmountOfToken(cdTokenAmountToSwap, CDTReserve, ethInReserve)
         console.log("ETH Return", EthReturn)
         setEthAmountToGet(EthReturn)
     }
 
-    async function Swap() {
-        const result = await SwapUtil(
+    async function EthToCDTSwap() {
+        await EthToCDTSwapUtil(
             exchangeAddress,
             exchangeAbi,
             ethAmountToSwap,
-            cdTokenAmountToSwap,
+            cdTokenAmountToGet,
             runContractFunction,
-            handleSwapSuccess
+            handleSuccess
         )
+    }
+
+    async function CDTToEthSwap() {
+        await CDTToEthSwapUtil(
+            exchangeAddress,
+            exchangeAbi,
+            cdTokenAmountToSwap,
+            ethAmountToGet,
+            runContractFunction,
+            handleSuccess
+        )
+    }
+
+    async function handleSuccess() {
+        dispatch({
+            type: "success",
+            title: "Transaction Successful",
+            description: "Transaction was successful",
+        })
+        setIsSwapping(false)
     }
 
     return (
         <div className="p-2 space-y-10 flex flex-col">
-            <div className="w-1/6 flex items-start p-2">
-                <Information topic="Your Current Allowance" information={`${currentCDTAllowed} CDT`} />
+            <div className=" flex flex-row p-2 space-x-20">
+                <div className="w-1/6">
+                    <Information topic="Your Current Allowance" information={`${currentCDTAllowed} CDT`} style />
+                </div>
+                <div className="flex flex-col space-y-2 absolute right-5 w-1/6">
+                    <Information topic="Eth Reserve" information={`${ethReserve} ETH`} />
+                    <Information topic="CDT Reserve " information={`${CDTReserve} CDT`} />
+                </div>
             </div>
             <div className="flex items-center justify-center">
                 <div className="flex flex-col items-center space-y-5 border-2 rounded-lg border-gray-200 p-5 w-1/2">
@@ -129,7 +163,10 @@ export default function Home() {
                                 theme="colored"
                                 color="green"
                                 isLoading={isSwapping}
-                                onClick={() => {}}
+                                onClick={() => {
+                                    setIsSwapping(true)
+                                    EthToCDTSwap()
+                                }}
                             />
                         </div>
                     ) : (
@@ -152,7 +189,10 @@ export default function Home() {
                                 theme="colored"
                                 color="green"
                                 isLoading={isSwapping}
-                                onClick={() => {}}
+                                onClick={() => {
+                                    setIsSwapping(true)
+                                    CDTToEthSwap()
+                                }}
                             />
                         </div>
                     )}

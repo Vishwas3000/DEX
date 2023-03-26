@@ -18,6 +18,10 @@ async function GetCurrentAllowanceUtil(
         params: allowanceOpt,
         onError: (error) => console.log(error),
     })
+    if (allowanceWei == null) {
+        console.log("allowanceWei is null")
+        return
+    }
     const allowance = ethers.utils.formatEther(allowanceWei)
     // console.log("allowance: ", allowance)
     return allowance

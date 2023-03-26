@@ -81,19 +81,6 @@ export default function Home() {
         return ethInReserve
     }
 
-    async function GetAmountOfToken(ethAmountToAdd, ethInContract, cdtInReserve) {
-        const minCdtToSend = await GetAmountOfTokenUtil(
-            exchangeAddress,
-            exchangeAbi,
-            ethAmountToAdd,
-            ethInContract,
-            cdtInReserve,
-            runContractFunction
-        )
-        console.log(minCdtToSend)
-        return minCdtToSend
-    }
-
     async function GetMinCDTAmountForEth() {
         const ethInReserve = await GetEthReserve()
         const cdtInReserve = await GetCDTReserve()
