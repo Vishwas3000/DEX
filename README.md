@@ -7,4 +7,4 @@ Website Link: https://decentralizedswap.netlify.app/
 3. Swap between Eth and CD tokens 
 
 To run local hardhat node:
-1. Install all the package needed in the Backend folder by using yarn 
+1. Install all the package needed in the Backend folder by using ```yarn``` 
