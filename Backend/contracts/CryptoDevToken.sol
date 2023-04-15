@@ -12,7 +12,16 @@ contract CryptoDevToken is ERC20, Ownable {
 
     mapping(uint256 => bool) public isTokenIdClimed;
 
-    constructor()  ERC20("Crypto Dev Token", "CD") {}
+    constructor() ERC20("CryptoDev Token", "CD") {
+        _mint(msg.sender, 1000 * 10 ** 18);
+    }
+
+    // function initialize() initializer public {
+    //     __ERC20_init("CryptoDev Token", "CD");
+    //     __Ownable_init();
+
+    //     _mint(msg.sender, 1000 * 10 ** 18);
+    // }
 
     function mint(uint256 amount) public payable {
         require(msg.value >= TOKEN_PRICE * MIN_TOKEN_TO_MINT, "Not enough Ether sent");

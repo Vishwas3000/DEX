@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.17;
 
 import "./Proxy.sol";
 
@@ -18,13 +18,13 @@ contract ProxyAdmin {
     }
 
     function getProxyAdmin(address proxy) external view returns (address) {
-        (bool ok, bytes memory res) = proxy.staticcall(abi.encodeWithSignature("admin()"));
+        (bool ok, bytes memory res) = proxy.staticcall(abi.encodeCall(Proxy.admin, ()));
         require(ok, "call failed");
         return abi.decode(res, (address));
     }
 
     function getProxyImplementation(address proxy) external view returns (address) {
-        (bool ok, bytes memory res) = proxy.staticcall(abi.encodeWithSignature("implementation()"));
+        (bool ok, bytes memory res) = proxy.staticcall(abi.encodeCall(Proxy.implementation, ()));
         require(ok, "call failed");
         return abi.decode(res, (address));
     }

@@ -1,24 +1,34 @@
 // SPDX-License-Identifier: MIT
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./utils/StorageSlot.sol";
 
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.17;
 
-contract Proxy is Initializable{
+contract Proxy is Initializable, ERC20Upgradeable{
+    address private cryptoDevToken;
 
     bytes32 private constant ADMIN_SLOT = bytes32(uint(keccak256("eip1967.proxy.admin")) - 1);
     bytes32 private constant IMPLEMENTATION_SLOT = bytes32(uint(keccak256("eip1967.proxy.implementation")) - 1);
 
     event AdminChanged(address indexed previousAdmin, address indexed newAdmin);
     event ImplementationChanged(address indexed previousImplementation, address indexed newImplementation);
+    event FallBackCalled();
+    event InitializerCalled(address cryptoDev, address impAddr, address admin);
 
-    function initialize() initializer public {
+    function initialize(address _cryptoDevToken, address _impAddr) initializer public {
+        emit InitializerCalled(_cryptoDevToken, _impAddr, msg.sender);
+
         _setAdmin(msg.sender);
+        _setImplementation(_impAddr);
+        cryptoDevToken = _cryptoDevToken;
+        __ERC20_init("CryptoDev LP Token", "CDLP");
     }
 
     modifier ifAdmin(){
+
         if(msg.sender == _getAdmin()){
             _;
         }
@@ -107,6 +117,7 @@ contract Proxy is Initializable{
     }
 
     function _fallback() private{
+        emit FallBackCalled();
         _delegate(_getImplementation());
     }
 

@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 
-contract ExchangeV1 is ERC20Upgradeable {
+contract ExchangeV2 is ERC20Upgradeable {
     address private cryptoDevTokenAddress;
+    uint256 private count;
 
     event LiquidityRemoved(uint256 ethAmount, uint256 CDAmount);
     event LiquidityAdded(uint256 ethAmount, uint256 CDAmount);
@@ -22,6 +23,14 @@ contract ExchangeV1 is ERC20Upgradeable {
 
     function initialize() initializer public {
         __ERC20_init("CryptoDev LP Token", "CDLP");
+    }
+
+    function addCount() public {
+        count+=1;
+    }
+
+    function getCount() public view returns(uint256){
+        return count;
     }
 
     function getReserve() public view returns (uint) {

@@ -1,26 +1,28 @@
 const { network } = require("hardhat")
-const { verify } = require("../utils/verify")
 const { developmentChains } = require("../helper-hardhat-config")
 const contractAddressess = require("../constants/contractAddressess.json")
 const { writeAddress } = require("../utils/writeAddress")
+const { verify } = require("../utils/verify")
 require("dotenv").config()
 
 module.exports = async () => {
+    const chainId = network.config.chainId.toString()
+
     const args = []
-    console.log("---------------------------")
-
-    const exchangeContract = await ethers.getContractFactory("ExchangeV1")
-    const exchange = await exchangeContract.deploy()
-    await exchange.deployed()
+    const proxyAdminContract = await ethers.getContractFactory("ProxyAdmin")
 
     console.log("---------------------------")
+    const proxyAdmin = await proxyAdminContract.deploy()
+    await proxyAdmin.deployed()
 
-    writeAddress(exchange, "ExchangeV1")
+    console.log("---------------------------")
+
+    writeAddress(proxyAdmin, "ProxyAdmin")
 
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
         console.log("Verifing...")
-        await verify(exchange.address, [args])
+        await verify(proxyAdmin.address, args)
     }
 }
 
-module.exports.tags = ["all", "exchange"]
+module.exports.tags = ["all", "proxyAdmin"]

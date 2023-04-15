@@ -19,7 +19,7 @@ module.exports = async () => {
     await writeAddress(cryptoDev, "CryptoDevToken")
 
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-        log("Verifing...")
+        console.log("Verifing...")
         await verify(cryptoDev.address, args)
     }
 }

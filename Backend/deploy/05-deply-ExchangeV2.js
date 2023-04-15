@@ -9,13 +9,13 @@ module.exports = async () => {
     const args = []
     console.log("---------------------------")
 
-    const exchangeContract = await ethers.getContractFactory("ExchangeV1")
+    const exchangeContract = await ethers.getContractFactory("ExchangeV2")
     const exchange = await exchangeContract.deploy()
     await exchange.deployed()
 
     console.log("---------------------------")
 
-    writeAddress(exchange, "ExchangeV1")
+    writeAddress(exchange, "ExchangeV2")
 
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
         console.log("Verifing...")
