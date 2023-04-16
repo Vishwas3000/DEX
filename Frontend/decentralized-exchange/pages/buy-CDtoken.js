@@ -20,7 +20,7 @@ export default function MintCryptoDev() {
 
     const dispatch = useNotification()
 
-    const contractAddress = contractAddresses[chainIdString]["CryptoDevToken"][0]
+    const contractAddress = contractAddresses[chainIdString]["CryptoDevToken"]
 
     useEffect(() => {
         GetMinimumTokenMint()

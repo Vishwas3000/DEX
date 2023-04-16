@@ -68,7 +68,7 @@ contract Proxy is Initializable, ERC20Upgradeable{
     }
 
 
-    function admin() external ifAdmin returns (address) {
+    function admin() external view returns (address) {
         return _getAdmin();
     }
 

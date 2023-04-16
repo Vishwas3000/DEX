@@ -10,8 +10,8 @@ async function getAdminAndImp() {
     // let txResponse = await admin.wait(1)
     // console.log("admin: ", txResponse)
 
-    let implementation = await proxyAdmin.getProxyImplementation(proxyAddress)
-    console.log("implementation: ", implementation)
+    // let implementation = await proxyAdmin.getProxyImplementation(proxyAddress)
+    // console.log("implementation: ", implementation)
     // txResponse = await implementation.wait(1)
     // console.log("implementation: ", txResponse)
 }

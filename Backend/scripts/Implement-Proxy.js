@@ -8,10 +8,6 @@ async function Admin() {
     let txResponse = await admin.wait(1)
 
     console.log("admin: ", txResponse)
-
-    let implementation = await proxy.implementation()
-    txResponse = await implementation.wait(1)
-    console.log("implementation: ", txResponse)
 }
 
 Admin()

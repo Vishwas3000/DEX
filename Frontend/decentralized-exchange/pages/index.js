@@ -2,7 +2,7 @@ import { Chicle, Inter } from "next/font/google"
 import Image from "next/image"
 import arrow from "../public/arrow.png"
 import { useMoralis, useWeb3Contract } from "react-moralis"
-import { exchangeAbi, contractAddresses } from "../constants/index"
+import { getImplementationAbi, getImplementationAddress, contractAddresses } from "../constants/index"
 import { useEffect, useState } from "react"
 import { useNotification, Button, Input, Information, Typography } from "web3uikit"
 import { GetCurrentAllowanceUtil } from "@/utils/ERC20Functions"
@@ -14,9 +14,13 @@ export default function Home() {
     const { isWeb3Enabled, chainId, account } = useMoralis()
     const chainIdString = chainId ? parseInt(chainId).toString() : "31337"
 
-    const exchangeAddress = contractAddresses[chainIdString]["Exchange"][0]
-    const cryptoDevAddress = contractAddresses[chainIdString]["CryptoDevToken"][0]
+    const exchangeAddress = contractAddresses[chainIdString]["Proxy"]
+    const cryptoDevAddress = contractAddresses[chainIdString]["CryptoDevToken"]
+
+    console.log("exchange address", exchangeAddress)
+    console.log("crypto dev address", cryptoDevAddress)
     const dispatch = useNotification()
+    const exchangeAbi = getImplementationAbi(1)
 
     const { runContractFunction } = useWeb3Contract()
 

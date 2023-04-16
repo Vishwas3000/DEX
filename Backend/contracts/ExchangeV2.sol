@@ -78,7 +78,7 @@ contract ExchangeV2 is ERC20Upgradeable {
     }
 
     function admin()public pure returns(address){
-        return address(12);
+        return address(1);
     }
 
     function getAmountOfToken(

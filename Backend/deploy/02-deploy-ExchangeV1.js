@@ -23,4 +23,4 @@ module.exports = async () => {
     }
 }
 
-module.exports.tags = ["all", "exchange"]
+module.exports.tags = ["all", "exchangeV1"]

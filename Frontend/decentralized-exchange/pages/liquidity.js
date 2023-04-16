@@ -1,6 +1,11 @@
 import { Chicle, Inter } from "next/font/google"
 import { useMoralis, useWeb3Contract } from "react-moralis"
-import { exchangeAbi, contractAddresses, cryptoDevTokenAbi } from "../constants/index"
+import {
+    contractAddresses,
+    cryptoDevTokenAbi,
+    getImplementationAbi,
+    getImplementationAddress,
+} from "../constants/index"
 import { ethers } from "ethers"
 import { useEffect, useState } from "react"
 import { Input, useNotification, Button, Information } from "web3uikit"
@@ -18,8 +23,9 @@ export default function Home() {
     const { isWeb3Enabled, chainId, account } = useMoralis()
     const chainIdString = chainId ? parseInt(chainId).toString() : "31337"
 
-    const exchangeAddress = contractAddresses[chainIdString]["Exchange"][0]
-    const CDTAddress = contractAddresses[chainIdString]["CryptoDevToken"][0]
+    const exchangeAddress = contractAddresses[chainIdString]["Proxy"]
+    const CDTAddress = contractAddresses[chainIdString]["CryptoDevToken"]
+    const exchangeAbi = getImplementationAbi(1)
 
     const dispatch = useNotification()
 
@@ -33,7 +39,6 @@ export default function Home() {
     const [cdTokenAmountToRemove, setCdTokenAmountToRemove] = useState("")
     const [ethAccountBal, setEthAccountBal] = useState("")
     const [cdlpBalance, setCdlpBalance] = useState("")
-
     const [addRemove, setAddRemove] = useState(true)
 
     useEffect(() => {
