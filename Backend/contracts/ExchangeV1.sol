@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -70,10 +70,6 @@ contract ExchangeV1 is ERC20Upgradeable {
 
     function admin()public pure returns(address){
         return address(12);
-    }
-
-    function implementation()public pure returns(address){
-        return address(13);
     }
 
     function getAmountOfToken(

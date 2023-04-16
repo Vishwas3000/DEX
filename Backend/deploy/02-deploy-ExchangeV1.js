@@ -1,8 +1,7 @@
 const { network } = require("hardhat")
 const { verify } = require("../utils/verify")
 const { developmentChains } = require("../helper-hardhat-config")
-const contractAddressess = require("../constants/contractAddressess.json")
-const { writeAddress } = require("../utils/writeAddress")
+const { writeAddress, writeAbi } = require("../utils/writeContract.js")
 require("dotenv").config()
 
 module.exports = async () => {
@@ -16,10 +15,11 @@ module.exports = async () => {
     console.log("---------------------------")
 
     writeAddress(exchange, "ExchangeV1")
+    writeAbi(exchange, "ExchangeV1")
 
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
         console.log("Verifing...")
-        await verify(exchange.address, [args])
+        await verify(exchange.address, args)
     }
 }
 

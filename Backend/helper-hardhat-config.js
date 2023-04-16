@@ -19,11 +19,16 @@ const networkConfig = {
 }
 const developmentChains = ["hardhat", "localhost"]
 
-const frontendConsts = "../Frontend/decentralized-exchange/constants/"
 const contractAddressessPath = "./constants/contractAddressess.json"
+const contractAbiPath = "./constants/"
+const frontendAddressPath = "../Frontend/decentralized-exchange/constants/contractAddressess.json"
+const frontendAbiPath = "../Frontend/decentralized-exchange/constants/"
+
 module.exports = {
     networkConfig,
     developmentChains,
-    frontendConsts,
     contractAddressessPath,
+    contractAbiPath,
+    frontendAddressPath,
+    frontendAbiPath,
 }
