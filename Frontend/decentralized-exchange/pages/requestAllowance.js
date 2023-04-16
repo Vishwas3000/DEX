@@ -17,7 +17,7 @@ export default function Home() {
     const [cdBalance, setCdBalance] = useState("")
 
     const exchangeAddress = contractAddresses[chainIdString]["Proxy"]
-    const exchangeAbi = getImplementationAbi(1)
+    const exchangeAbi = getImplementationAbi(2)
     const CDTAddress = contractAddresses[chainIdString]["CryptoDevToken"]
     const dispatch = useNotification()
 
@@ -82,6 +82,7 @@ export default function Home() {
                             label="Allowance Needed"
                             autoComplete
                             onChange={(event) => {
+                                console.log(event.target.value)
                                 setCDTokenAmount(event.target.value)
                             }}
                         />

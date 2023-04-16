@@ -20,7 +20,7 @@ export default function Home() {
     console.log("exchange address", exchangeAddress)
     console.log("crypto dev address", cryptoDevAddress)
     const dispatch = useNotification()
-    const exchangeAbi = getImplementationAbi(1)
+    const exchangeAbi = getImplementationAbi(2)
 
     const { runContractFunction } = useWeb3Contract()
 
@@ -142,8 +142,8 @@ export default function Home() {
                     <Information topic="Your Current Allowance" information={`${currentCDTAllowed} CDT`} style />
                 </div>
                 <div className="flex flex-col space-y-2 absolute right-5 w-1/6">
-                    <Information topic="Eth Reserve" information={`${parseFloat(ethReserve).toFixed(1)} ETH`} />
-                    <Information topic="CDT Reserve " information={`${parseFloat(CDTReserve).toFixed(1)} CDT`} />
+                    <Information topic="Eth Reserve" information={`${parseFloat(ethReserve).toFixed(2)} ETH`} />
+                    <Information topic="CDT Reserve " information={`${parseFloat(CDTReserve).toFixed(2)} CDT`} />
                 </div>
             </div>
             <div className="flex items-center justify-center">

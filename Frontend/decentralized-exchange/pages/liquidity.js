@@ -25,7 +25,7 @@ export default function Home() {
 
     const exchangeAddress = contractAddresses[chainIdString]["Proxy"]
     const CDTAddress = contractAddresses[chainIdString]["CryptoDevToken"]
-    const exchangeAbi = getImplementationAbi(1)
+    const exchangeAbi = getImplementationAbi(2)
 
     const dispatch = useNotification()
 

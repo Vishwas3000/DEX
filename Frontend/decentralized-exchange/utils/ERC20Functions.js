@@ -35,11 +35,12 @@ async function ApproveAllowanceUtil(
     amountToApprove,
     handleSuccess
 ) {
+    const amountToApproveWei = ethers.utils.parseEther(amountToApprove)
     const approveOpt = {
         abi: contractAbi,
         contractAddress: contractAddress,
         functionName: "approve",
-        params: { spender: spenderAddress, amount: amountToApprove },
+        params: { spender: spenderAddress, amount: amountToApproveWei },
     }
 
     const isApproved = await runContractFunction({
