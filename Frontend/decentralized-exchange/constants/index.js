@@ -4,6 +4,8 @@ import contractAddresses from "./contractAddressess.json" assert { type: "json" 
 
 const BLOCK_WAIT_TIME = 1
 
-async function getImplementationAbi() {}
+async function getImplementationAbi() {
+    const test = 1
+}
 
 export { exchangeAbi, cryptoDevTokenAbi, contractAddresses, BLOCK_WAIT_TIME }
